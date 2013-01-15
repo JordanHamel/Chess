@@ -28,6 +28,13 @@ class Chess
   # Checkmate!
   # checkmate(white) ? Black wins! : White wins!
 
+  def move_piece(from, to)
+    # Place on to
+    @board[to[0]][to[1]] = @board[from[0]][from[1]]
+    # Remove from from
+    @board[from[0]][from[1]] = nil
+  end
+
   get_move(player)
     # until valid_move?
       # player.get_move
@@ -46,29 +53,39 @@ class Chess
     # Can King move to safety?
     # Can any of player's moves block the check?
 
-  valid_move?(from, to)
-    # moves on the board?
+  def valid_move?(from, to, player) # from/to: [x, y]
+    to_piece = @board[to[0]][to[1]]
+    from_piece = @board[from[0]][from[1]]
+    return false unless on_board?(from) && on_board?(to)
     # make sure the player is moving his/her own pieces
-
+    return false unless from_piece.color == player.color
     # correct piece-type movement (piece.available_moves(from).include?(to))
     # Is there a piece on to?
-      # If yes, check color
-        # If same color, invalid
-        # If opposite color, valid
-      # If no, valid
+    unless to_piece.nil?
+      return false if to_piece.color == player.color
+    end
     # invalid if there any pieces on the path
     # invalid if move puts your king in check?
+  end
 
-  move_piece(from, to)
-    # Remove from from
-    # Place on to
-    # Remove any piece that was on to
+  def on_board?(pos)
+    (0..7).include?(pos[0]) && (0..7).include?(pos[1])
+  end
 end
 
-HumanPlayer
-get_move
-  # input: e4, a2
-  # returns: [from, to]
+class Player
+  attr_reader :color
+
+  def initialize(color)
+    @color = color
+  end
+end
+
+class HumanPlayer < Player
+  get_move
+    # input: e4, a2
+    # returns: [from, to]
+end
 
 class Piece
   attr_reader :color
@@ -94,14 +111,18 @@ class Rook < Piece
 end
 
 class Pawn < Piece
+
+      #if landing on another color, move must be diagonal
+      #else move must be straigt
 end
 
 way of moving
 #direction
 #how far can they move?
 
-availabe_moves(pos)
-# returns an array of valid positions
+available_moves(pos)
+# returns an array of possible next positions (not taking into account
+# the state of the board)
 
 path(from, to)
 # returns an array of positions from from to to
