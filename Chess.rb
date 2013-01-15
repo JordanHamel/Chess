@@ -1,10 +1,9 @@
 class Chess
-  # Initialize with full set of pieces
-  @white_pieces = new_chess_set
-  @black_pieces = new_chess_set
-  @board = Array.new(8) { Array.new(8) }
-  populate_board
-  # Array of arrays of piece objects (8 x 8)
+  def initialize
+    @board = Array.new(8) { Array.new(8) }
+    populate_board
+    @white_player, @black_player = HumanPlayer.new, HumanPlayer.new
+  end
 
   def populate_board
     # Populate back rows
@@ -18,18 +17,6 @@ class Chess
     @board[1].map { Pawn.new(:white) }
     @board[6].map { Pawn.new(:black) }
   end
-
-  @white_player, @black_player = HumanPlayer.new, HumanPlayer.new
-
-  new_chess_set
-    # pieces = []
-    # 8.times { pieces << Pawn.new }
-    # 2.times do
-      # pieces << Rook.new
-      # pieces << Bishop.new
-      # pieces << Knight.new
-    # end
-    # pieces << King.new << Queen.new
 
   play
   # Until checkmate
