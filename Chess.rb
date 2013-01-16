@@ -27,6 +27,11 @@ class Chess
                 Bishop => 'B',
                 Rook => 'R',
                 Pawn => 'P' }
+
+    puts
+    print "  "
+    puts "CHESS".center(18, '-')
+
     @board.each_with_index do |row, x|
       print "\n  "
       print "#{(x - 8).abs}| "
@@ -43,6 +48,7 @@ class Chess
         print "#{mark} "
       end
     end
+
     puts
     puts "     " << "-"*15
     print "     "
@@ -59,8 +65,8 @@ class Chess
       end
     end
 
-    # Checkmate!
-    # checkmate(white) ? Black wins! : White wins!
+    puts "Game over!"
+    checkmate?(white) ? puts("Black wins!") : puts("White wins!")
   end
 
   def move_piece(from, to)
@@ -109,7 +115,8 @@ class Chess
     return false unless from_piece.available_moves(from).include?(to)
 
     # invalid if there any pieces on the path
-    # invalid if move puts your king in check?
+    # invalid if move puts player's own king in check?
+      # How to 'fake' a move? (i.e. if the move is made, is it a check?)
 
     true
   end
