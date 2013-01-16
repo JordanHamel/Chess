@@ -22,6 +22,19 @@ class Chess
     @board[6].map! { Pawn.new(:white) }
   end
 
+  def play
+    until checkmate?
+      [@white_player, @black_player].each do |player|
+        print_board
+        from, to = get_move(player)
+        move_piece(from, to)
+      end
+    end
+
+    puts "Game over!"
+    checkmate?(white) ? puts("Black wins!") : puts("White wins!")
+  end
+
   def print_board
     # Uses chess unicode characters
     black_visuals = { King => "\u265A",
@@ -66,19 +79,6 @@ class Chess
     puts "\n\n"
   end
 
-  def play
-    until checkmate?
-      [@white_player, @black_player].each do |player|
-        print_board
-        from, to = get_move(player)
-        move_piece(from, to)
-      end
-    end
-
-    puts "Game over!"
-    checkmate?(white) ? puts("Black wins!") : puts("White wins!")
-  end
-
   def move_piece(from, to)
     # Place on to
     @board[to[0]][to[1]] = @board[from[0]][from[1]]
@@ -121,15 +121,20 @@ class Chess
     # Is there a piece on to?
     unless to_piece.nil?
       return false if to_piece.color == player.color
+      #add a check for pawns
     end
     # correct piece-type movement
     return false unless from_piece.available_moves(from).include?(to)
 
-    # invalid if there any pieces on the path
+    # invalid if there any pieces on the path, except for knights
     # invalid if move puts player's own king in check?
       # How to 'fake' a move? (i.e. if the move is made, is it a check?)
 
     true
+  end
+
+  def on_board?(pos)
+    (0..7).include?(pos[0]) && (0..7).include?(pos[1])
   end
 
   def check?(player)
@@ -168,9 +173,6 @@ class Chess
     # Can King move to safety?
     # Can any of player's moves block the check?
 
-  def on_board?(pos)
-    (0..7).include?(pos[0]) && (0..7).include?(pos[1])
-  end
 end
 
 class Player
@@ -226,6 +228,56 @@ class Piece
       moves << [x - i, y - i]
     end
     moves
+  end
+
+  def straight_path(move)
+    from, to = move
+    path = []
+    if to[1] > from[1]
+      (from[1]..to[1]).times do |i|
+        path << [from[1 + i],from[0]]
+      end
+    end
+    if to[1] < from[1]
+      (from[1]..to[1]).times do |i|
+        path << [from[1 - i],from[0]]
+      end
+    end
+    if to[0] > from[0]
+      (from[0]..to[0]).times do |i|
+        path << [to[1], from[1 + i]]
+      end
+    end
+    if to[0] < from[0]
+      (from[0]..to[0]).times do |i|
+        path << [to[1], from[1 - i]]
+      end
+    end
+  end
+
+  def diagonal_path(move)
+    from, to = move
+    path = []
+    if to[0] > from[0] && to[1] > from[1]
+      (from[1]..to[1]).times do |i|
+        path << [from[1 + i],from[1 + i]]
+      end
+    end
+    if to[0] < from[0] && to[1] > from[1]
+      (from[1]..to[1]).times do |i|
+        path << [from[1 + i],from[1 - i]]
+      end
+    end
+    if to[0] < from[0] && to[1] < from[1]
+      (from[1]..to[1]).times do |i|
+        path << [from[1 - i],from[1 + i]]
+      end
+    end
+    if to[0] < from[0] && to[1] < from[1]
+      (from[1]..to[1]).times do |i|
+        path << [from[1 - i],from[1 - i]]
+      end
+    end
   end
 end
 
