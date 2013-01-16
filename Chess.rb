@@ -21,12 +21,19 @@ class Chess
   end
 
   def print_board
-    visuals = { King => 'K',
-                Queen => 'Q',
-                Knight => 'N',
-                Bishop => 'B',
-                Rook => 'R',
-                Pawn => 'P' }
+    black_visuals = { King => "\u265A",
+                Queen => "\u265B",
+                Knight => "\u265E",
+                Bishop => "\u265D",
+                Rook => "\u265C",
+                Pawn => "\u265F" }
+
+    white_visuals = { King => "\u2654",
+                Queen => "\u2655",
+                Knight => "\u2658",
+                Bishop => "\u2657",
+                Rook => "\u2656",
+                Pawn => "\u2659" }
 
     puts
     print "  "
@@ -40,9 +47,9 @@ class Chess
           "*"
         else
           if piece.color == :white
-            visuals[piece.class].downcase
+            white_visuals[piece.class]
           else
-            visuals[piece.class]
+            black_visuals[piece.class]
           end
         end
         print "#{mark} "
