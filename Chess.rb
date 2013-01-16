@@ -88,6 +88,7 @@ class Chess
 
   def get_move(player)
     while true
+      print "#{player.color.to_s.capitalize}'s move (ex: 'e2, d4'): "
       move = player.get_move
       from, to = convert_move(move)
       break if valid_move?(from, to, player)
@@ -186,7 +187,6 @@ end
 
 class HumanPlayer < Player
   def get_move
-    print "What's your move (ex: 'e2, d4')? "
     gets.chomp.downcase.split(', ')
   end
 end
