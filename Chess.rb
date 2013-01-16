@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 class Chess
   attr_reader :white_player, :black_player
   def initialize
@@ -21,6 +23,7 @@ class Chess
   end
 
   def print_board
+    # Uses chess unicode characters
     black_visuals = { King => "\u265A",
                 Queen => "\u265B",
                 Knight => "\u265E",
@@ -48,7 +51,7 @@ class Chess
         else
           if piece.color == :white
             white_visuals[piece.class]
-          else
+          elsif piece.color == :black
             black_visuals[piece.class]
           end
         end
@@ -196,6 +199,8 @@ class Piece
   end
 
   def straight_lines(pos)
+    # Returns an array of all positions on the vertical and
+    # horizontal of 'pos'
     x, y = pos
     moves = []
     (0..7).each do |i|
@@ -206,6 +211,7 @@ class Piece
   end
 
   def diagonal_lines(pos)
+    # Returns an array of all positions on both diagonals of 'pos'
     x, y = pos
     moves = []
     (0..7).each do |i|
