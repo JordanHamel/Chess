@@ -21,12 +21,12 @@ class Chess
   end
 
   def print_board
-    visuals = { 'King' => 'K',
-                'Queen' => 'Q',
-                'Knight' => 'N',
-                'Bishop' => 'B',
-                'Rook' => 'R',
-                'Pawn' => 'P' }
+    visuals = { King => 'K',
+                Queen => 'Q',
+                Knight => 'N',
+                Bishop => 'B',
+                Rook => 'R',
+                Pawn => 'P' }
     @board.each_with_index do |row, x|
       print "\n  "
       print "#{(x - 8).abs}| "
@@ -35,9 +35,9 @@ class Chess
           "*"
         else
           if piece.color == :white
-            visuals[piece.class.to_s].downcase
+            visuals[piece.class].downcase
           else
-            visuals[piece.class.to_s]
+            visuals[piece.class]
           end
         end
         print "#{mark} "
@@ -105,7 +105,6 @@ class Chess
     unless to_piece.nil?
       return false if to_piece.color == player.color
     end
-
     # correct piece-type movement
     return false unless from_piece.available_moves(from).include?(to)
 
@@ -115,13 +114,32 @@ class Chess
     true
   end
 
-  # check?(player)
-    # Is player's King in check?
-      # Check to see if King's position is in any of
-      # opposite player's pieces' available moves
+  def check?(player)
+    total_valid_possible_moves = []
+    player_king_position = []
+    # Iterate over board
+    @board.each_with_index do |row, x|
+      row.each_with_index do |piece, y|
+        next if piece.nil?
+        # Set position of player's King piece
+        if piece.class == King && piece.color == player.color
+          player_king_position = [x, y]
+        end
+        if piece.color == player.opponent_color
+          # Get their possible moves
+          avail = piece.available_moves
+          # Convert them into [from, to]
+          avail.map! { |pos| [[x, y], pos] }
+          # Select the ones that are valid moves
+          valids = avail.select { |move| valid_move?(move) }
+          # Add them to total_valid_possible_moves
+          total_valid_possible_moves += valids
+        end
+      end
+    end
 
-      # For each of the other player's pieces
-      #{valid_move?(current pos, other king pos)}
+    total_valid_possible_moves.include?(player_king_position)
+  end
 
   def checkmate?
     false
@@ -142,6 +160,10 @@ class Player
 
   def initialize(color)
     @color = color
+  end
+
+  def opponent_color
+    self.color == :white ? :black : :white
   end
 end
 
@@ -240,14 +262,9 @@ class Pawn < Piece
   end
 end
 
-# way of moving
-#direction
-#how far can they move?
-
 # path(from, to)
 # returns an array of positions from from to to
 # custom build for each type of piece
-
 
 game = Chess.new
 game.play
