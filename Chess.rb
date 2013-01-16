@@ -191,6 +191,11 @@ class HumanPlayer < Player
   end
 end
 
+class ComputerPlayer < Player
+  def get_move
+  end
+end
+
 class Piece
   attr_reader :color
 
