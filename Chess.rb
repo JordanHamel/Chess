@@ -272,18 +272,13 @@ class Pawn < Piece
 
     x, y = pos
     if self.color == :black
-      if x == 1
-        [ [x + 1, y], [x + 2, y] ]
-      else
-        [ [x + 1, y] ]
-      end
+      moves = [ [x + 1, y] ]
+      moves << [x + 2, y] if x == 1
     elsif self.color == :white
-      if x == 6
-        [ [x - 1, y], [x - 2, y] ]
-      else
-        [ [x - 1, y] ]
-      end
+      moves = [ [x - 1, y] ]
+      moves << [x - 2, y] if x == 6
     end
+    moves
   end
 end
 
