@@ -118,18 +118,37 @@ class Chess
     return false unless on_board?(from) && on_board?(to)
     # Make sure the player is moving his/her own pieces
     return false unless from_piece.color == player.color
-    # Is there a piece on to?
-    unless to_piece.nil?
-      return false if to_piece.color == player.color
-      #add a check for pawns
+
+    # Can you land there?
+    if from_piece.class == Pawn
+      if from_piece.is_straight?(from, to)
+        #can't land on anything
+        return false unless to_piece.nil?
+      else
+        #must land on the other color
+        return false if to_piece == player.color || to_piece.nil?
+      end
+    else
+      #'to' check for non-pawns
+      unless to_piece.nil?
+        return false if to_piece.color == player.color
+      end
     end
+
     # correct piece-type movement
     return false unless from_piece.available_moves(from).include?(to)
 
     # invalid if there any pieces on the path, except for knights
+    unless from_piece.class == Knight
+      # returns an array. make sure that everyboard space in the array is nil
+      from_piece.path(from, to).each do |pair|
+        p pair
+        p pair[0]
+        return false unless @board[pair[0].to_i][pair[1].to_i].nil?
+      end
+    end
     # invalid if move puts player's own king in check?
       # How to 'fake' a move? (i.e. if the move is made, is it a check?)
-
     true
   end
 
@@ -140,6 +159,7 @@ class Chess
   def check?(player)
     total_valid_possible_moves = []
     player_king_position = []
+
     # Iterate over board
     @board.each_with_index do |row, x|
       row.each_with_index do |piece, y|
@@ -210,10 +230,12 @@ class Piece
     # horizontal of 'pos'
     x, y = pos
     moves = []
+
     (0..7).each do |i|
       moves << [x, i]
       moves << [i, y]
     end
+
     moves
   end
 
@@ -221,64 +243,105 @@ class Piece
     # Returns an array of all positions on both diagonals of 'pos'
     x, y = pos
     moves = []
+
     (0..7).each do |i|
       moves << [x + i, y + i]
       moves << [x + i, y - i]
       moves << [x - i, y + i]
       moves << [x - i, y - i]
     end
+
     moves
   end
 
-  def straight_path(move)
-    from, to = move
+  def straight_path(from, to)
     path = []
+    # p "from[0]:"
+    # p from[0]
+    # p "from[1]: #{from[1]}"
+    # p "to[0]: #{to[0]}"
+    # p "to[1]: #{to[1]}"
+
+    i = 1
+
     if to[1] > from[1]
-      (from[1]..to[1]).times do |i|
-        path << [from[1 + i],from[0]]
+      (from[1]-to[1]).abs.-(1).times do
+        path << [(from[1] + i),from[0]]
+        i += 1
       end
+      p path
     end
+
     if to[1] < from[1]
-      (from[1]..to[1]).times do |i|
-        path << [from[1 - i],from[0]]
+      (from[1]-to[1]).abs.-(1).times do
+        path << [(from[1] - i), from[0]]
+        i += 1
       end
+      p path
     end
+
     if to[0] > from[0]
-      (from[0]..to[0]).times do |i|
-        path << [to[1], from[1 + i]]
+      (from[0]-to[0]).abs.-(1).times do
+        path << [(from[0] + i), to[1]]
+        i += 1
+      end
+      p path
+    end
+
+    if to[0] < from[0]
+      (from[0]-to[0]).abs.-(1).times do
+        path << [(from[0] - i), to[1]]
+        i += 1
+      end
+      p path
+    end
+    path #returned outside of all do/end loops!
+  end
+
+  #fix these!!!
+  def diagonal_path(from, to)
+    path = []
+
+    i = 1
+
+    if to[0] > from[0] && to[1] > from[1]
+      (from[1]-to[1]).abs.-(1).times do
+        path << [(from[1] - i),from[1 + i]]
+        i += 1
       end
     end
-    if to[0] < from[0]
-      (from[0]..to[0]).times do |i|
-        path << [to[1], from[1 - i]]
+
+    if to[0] < from[0] && to[1] > from[1]
+      (from[1]-to[1]).abs.-(1).times do
+        path << [(from[1] - 1),from[1 - i]]
+        i += 1
       end
+    end
+
+    if to[0] < from[0] && to[1] < from[1]
+      (from[1]-to[1]).abs.-(1).times do
+        path << [(from[1] + 1),from[1 + i]]
+        i += 1
+      end
+    end
+
+    if to[0] < from[0] && to[1] < from[1]
+      (from[1]-to[1]).abs.-(1).times do
+        path << [(from[1] + 1),from[1 - i]]
+        i += 1
+      end
+    end
+
+  end
+
+  def is_straight?(from, to)
+    if from[0] == to[0] || from[1] == to[1]
+      true
+    else
+      false
     end
   end
 
-  def diagonal_path(move)
-    from, to = move
-    path = []
-    if to[0] > from[0] && to[1] > from[1]
-      (from[1]..to[1]).times do |i|
-        path << [from[1 + i],from[1 + i]]
-      end
-    end
-    if to[0] < from[0] && to[1] > from[1]
-      (from[1]..to[1]).times do |i|
-        path << [from[1 + i],from[1 - i]]
-      end
-    end
-    if to[0] < from[0] && to[1] < from[1]
-      (from[1]..to[1]).times do |i|
-        path << [from[1 - i],from[1 + i]]
-      end
-    end
-    if to[0] < from[0] && to[1] < from[1]
-      (from[1]..to[1]).times do |i|
-        path << [from[1 - i],from[1 - i]]
-      end
-    end
-  end
 end
 
 class King < Piece
@@ -288,17 +351,29 @@ class King < Piece
                  [x - 1, y - 1], [x, y - 1], [x + 1, y - 1],
                  [x - 1, y], [x + 1, y]]
   end
+
+  def path(from, to)
+    nil
+  end
 end
 
 class Queen < Piece
   def available_moves(pos)
     straight_lines(pos) + diagonal_lines(pos)
   end
+
+  def path(from, to)
+    is_straight?(from, to) ? straight_path(from, to) : diagonal_path(from, to)
+  end
 end
 
 class Bishop < Piece
   def available_moves(pos)
     diagonal_lines(pos)
+  end
+
+  def path(from, to)
+    diagonal_path(from, to)
   end
 end
 
@@ -316,22 +391,30 @@ class Rook < Piece
   def available_moves(pos)
     straight_lines(pos)
   end
+
+  def path(from, to)
+    straight_path(from, to)
+  end
+
 end
 
 class Pawn < Piece
   def available_moves(pos)
-    # Still have to address the diagonal kill case
-
     x, y = pos
     if self.color == :black
-      moves = [ [x + 1, y] ]
+      moves = [ [x + 1, y], [x + 1, y + 1], [x + 1, y - 1] ]
       moves << [x + 2, y] if x == 1
     elsif self.color == :white
-      moves = [ [x - 1, y] ]
+      moves = [ [x - 1, y], [x - 1, y + 1], [x - 1, y - 1]  ]
       moves << [x - 2, y] if x == 6
     end
     moves
   end
+
+  def path(from, to)
+    p straight_path(from, to)
+  end
+
 end
 
 # path(from, to)
