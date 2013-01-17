@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'debugger'
+
 class Chess
   attr_reader :white_player, :black_player
   def initialize
@@ -140,6 +142,7 @@ class Chess
 
     # invalid if there any pieces on the path, except for knights
     unless from_piece.class == Knight
+      debugger
       # returns an array. make sure that everyboard space in the array is nil
       from_piece.path(from, to).each do |pair|
         p pair
@@ -298,13 +301,13 @@ class Piece
     path #returned outside of all do/end loops!
   end
 
-  #fix these!!!
   def diagonal_path(from, to)
     path = []
 
     i = 1
 
     if to[0] > from[0] && to[1] > from[1]
+      puts "1"
       (from[1]-to[1]).abs.-(1).times do
         path << [(from[1] - i),from[1 + i]]
         i += 1
@@ -312,26 +315,29 @@ class Piece
     end
 
     if to[0] < from[0] && to[1] > from[1]
+      puts "2"
       (from[1]-to[1]).abs.-(1).times do
-        path << [(from[1] - 1),from[1 - i]]
+        path << [(from[1] + i),from[1 - i]]
+        i += 1
+      end
+    end
+
+    if to[0] > from[0] && to[1] > from[1]
+      puts "3"
+      (from[1]-to[1]).abs.-(1).times do
+        path << [(from[1] + i),from[1 + i]]
         i += 1
       end
     end
 
     if to[0] < from[0] && to[1] < from[1]
+      puts "4"
       (from[1]-to[1]).abs.-(1).times do
-        path << [(from[1] + 1),from[1 + i]]
+        path << [(from[1] - i),from[1 - i]]
         i += 1
       end
     end
-
-    if to[0] < from[0] && to[1] < from[1]
-      (from[1]-to[1]).abs.-(1).times do
-        path << [(from[1] + 1),from[1 - i]]
-        i += 1
-      end
-    end
-
+    path
   end
 
   def is_straight?(from, to)
@@ -412,7 +418,7 @@ class Pawn < Piece
   end
 
   def path(from, to)
-    p straight_path(from, to)
+    straight_path(from, to)
   end
 
 end
