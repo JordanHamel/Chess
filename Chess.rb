@@ -38,6 +38,12 @@ class Chess
   end
 
   def print_board
+
+    # ***
+    # NR You could move this into class constants to clean
+    # up the code a little.
+    # ***
+
     # Uses chess unicode characters
     black_visuals = { King => "\u265A",
                 Queen => "\u265B",
@@ -121,6 +127,15 @@ class Chess
     # Make sure the player is moving his/her own pieces
     return false unless from_piece.color == player.color
 
+    # ***
+    # NR You could shorten and clean up this method a bit
+    # by seperating some of the functions that are done
+    # here. For example, you could create a check_travel?
+    # method that does all the pieces-on-path type stuff.
+    # Similarly, the Pawn special case could go into its
+    # own method as well.
+    # ***
+
     # Can you land there?
     if from_piece.class == Pawn
       if from_piece.is_straight?(from, to)
@@ -151,6 +166,15 @@ class Chess
       end
     end
     # invalid if move puts player's own king in check?
+
+    # ***
+    # NR my thoughts: a move will result in a check if after it is made,
+    # the opponent has a piece for which it has a valid, possible move
+    # whoose destination is the same coordinates as your king. So, you
+    # check all the opponent pieces, and see if any of them fit the
+    # criteria.
+    # ***
+
       # How to 'fake' a move? (i.e. if the move is made, is it a check?)
     true
   end
@@ -164,6 +188,15 @@ class Chess
     player_king_position = []
 
     # Iterate over board
+
+    # ***
+    # NR One thing that might help here is that the
+    # player class should know what pieces it owns.
+    # Thay way, for methods such as this one, you
+    # don't have to search the whole board for
+    # player's pieces.
+    # ***
+
     @board.each_with_index do |row, x|
       row.each_with_index do |piece, y|
         next if piece.nil?
@@ -195,6 +228,11 @@ class Chess
     # Is king in check?
     # Can King move to safety?
     # Can any of player's moves block the check?
+
+    # ***
+    # NR One more to consider: Can any of the player's
+    # moves capture the piece that causing the check?
+    # ***
 
 end
 
@@ -256,6 +294,12 @@ class Piece
 
     moves
   end
+
+  # ***
+  # NR These next two are a bit repetitive (within
+  # themselves). You might want to try something
+  # else to cut down on code.
+  # ***
 
   def straight_path(from, to)
     path = []
@@ -352,6 +396,12 @@ end
 
 class King < Piece
   def available_moves(pos)
+    # ***
+    # NR If your straight lines method took in an argument
+    # to say how far it should go, you could re-use it
+    # here. Same with the Pawn (to some extent)
+    # ***
+    
     x, y = pos
     neighbors = [[x - 1, y + 1], [x, y + 1], [x + 1, y + 1],
                  [x - 1, y - 1], [x, y - 1], [x + 1, y - 1],
