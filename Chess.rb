@@ -1,9 +1,9 @@
-#!/usr/bin/env ruby
-
-require 'debugger'
+#Jordan Hamel
 
 class Chess
+
   attr_reader :white_player, :black_player
+
   def initialize
     @board = Array.new(8) { Array.new(8) }
     populate_board
@@ -11,6 +11,7 @@ class Chess
     @black_player = HumanPlayer.new(:black)
   end
 
+  #board setup
   def populate_board
     # Populate back rows
     [[0, :black], [7, :white]].each do |(row, color)|
@@ -24,19 +25,22 @@ class Chess
     @board[6].map! { Pawn.new(:white) }
   end
 
+  #play the game!
   def play
-    until checkmate?
+    while true
       [@white_player, @black_player].each do |player|
         print_board
         from, to = get_move(player)
         move_piece(from, to)
+        break if checkmate?(player)
       end
     end
 
     puts "Game over!"
-    checkmate?(white) ? puts("Black wins!") : puts("White wins!")
+    checkmate?(@white_player) ? puts("Black wins!") : puts("White wins!")
   end
 
+  #print the board before each move
   def print_board
     # Uses chess unicode characters
     black_visuals = { King => "\u265A",
@@ -81,13 +85,7 @@ class Chess
     puts "\n\n"
   end
 
-  def move_piece(from, to)
-    # Place on to
-    @board[to[0]][to[1]] = @board[from[0]][from[1]]
-    # Remove from from
-    @board[from[0]][from[1]] = nil
-  end
-
+  ### MOVE FUNCTIONS ###
   def get_move(player)
     while true
       print "#{player.color.to_s.capitalize}'s move (ex: 'e2, d4'): "
@@ -109,6 +107,14 @@ class Chess
     end
   end
 
+  def move_piece(from, to)
+    # Place on to
+    @board[to[0]][to[1]] = @board[from[0]][from[1]]
+    # Remove from from
+    @board[from[0]][from[1]] = nil
+  end
+
+  ### FUNCTIONS THAT CHECK FOR VALIDITY OF MOVE ###
   def valid_move?(from, to, player) # from/to: [x, y]
     to_piece = @board[to[0]][to[1]]
     from_piece = @board[from[0]][from[1]]
@@ -142,7 +148,6 @@ class Chess
 
     # invalid if there any pieces on the path, except for knights
     unless from_piece.class == Knight
-      debugger
       # returns an array. make sure that everyboard space in the array is nil
       from_piece.path(from, to).each do |pair|
         p pair
@@ -159,11 +164,12 @@ class Chess
     (0..7).include?(pos[0]) && (0..7).include?(pos[1])
   end
 
+  ### FUNCTIONS FOR CHECK & CHECKMATE ###
   def check?(player)
     total_valid_possible_moves = []
     player_king_position = []
 
-    # Iterate over board
+    # Go through each space on the board
     @board.each_with_index do |row, x|
       row.each_with_index do |piece, y|
         next if piece.nil?
@@ -172,13 +178,13 @@ class Chess
           player_king_position = [x, y]
         end
         if piece.color == player.opponent_color
-          # Get their possible moves
+          # get opponents possible moves
           avail = piece.available_moves
-          # Convert them into [from, to]
+          # convert moves
           avail.map! { |pos| [[x, y], pos] }
-          # Select the ones that are valid moves
+          # choose the valid moves
           valids = avail.select { |move| valid_move?(move) }
-          # Add them to total_valid_possible_moves
+          # add them to total_valid_possible_moves
           total_valid_possible_moves += valids
         end
       end
@@ -187,18 +193,43 @@ class Chess
     total_valid_possible_moves.include?(player_king_position)
   end
 
-  def checkmate?
-    false
+  def checkmate?(player)
+    #If players king is in check
+    if check?(player)
+      #return false if king can move to safety
+      return false if can_move_to_safety?(player)
+      return false if attack_can_be_blocked?(player)
+    end
+    true
   end
-  # checkmate?(player)
-    # Is player's king in checkmate?
-    # Is king in check?
-    # Can King move to safety?
-    # Can any of player's moves block the check?
+
+  def can_move_to_safety?(player)
+    #find player's king
+    king_pos = nil
+    @board.each_with_index do |row, x|
+      @baord.each_with_index do |piece, y|
+        next if piece.nil?
+        if piece.class == King && piece.color == player.color
+          king_pos = [x, y]
+        end
+      end
+    end
+    #check all neighboring spaces
+    piece.available_moves(king_pos).each do |space|
+       #return false if any of those spaces are in check
+    end
+  end
+
+  def attack_can_be_blocked?(player)
+    #return true if any piece on the board can 
+    #move in the path between the attacker and the king
+  end
 
 end
 
+### PLAYER CLASS ###
 class Player
+
   attr_reader :color
 
   def initialize(color)
@@ -210,24 +241,23 @@ class Player
   end
 end
 
+### HUMAN PLAYER ###
 class HumanPlayer < Player
   def get_move
     gets.chomp.downcase.split(', ')
   end
 end
 
-class ComputerPlayer < Player
-  def get_move
-  end
-end
-
+### PIECE CLASS ###
 class Piece
+
   attr_reader :color
 
   def initialize(color)
     @color = color
   end
 
+  #defines moving in a straight line
   def straight_lines(pos)
     # Returns an array of all positions on the vertical and
     # horizontal of 'pos'
@@ -242,6 +272,7 @@ class Piece
     moves
   end
 
+  #defines moving in a diagonal line
   def diagonal_lines(pos)
     # Returns an array of all positions on both diagonals of 'pos'
     x, y = pos
@@ -257,6 +288,7 @@ class Piece
     moves
   end
 
+  #returns an array of positions in a straight move
   def straight_path(from, to)
     path = []
     # p "from[0]:"
@@ -272,7 +304,6 @@ class Piece
         path << [(from[1] + i),from[0]]
         i += 1
       end
-      p path
     end
 
     if to[1] < from[1]
@@ -280,7 +311,6 @@ class Piece
         path << [(from[1] - i), from[0]]
         i += 1
       end
-      p path
     end
 
     if to[0] > from[0]
@@ -288,7 +318,6 @@ class Piece
         path << [(from[0] + i), to[1]]
         i += 1
       end
-      p path
     end
 
     if to[0] < from[0]
@@ -296,11 +325,11 @@ class Piece
         path << [(from[0] - i), to[1]]
         i += 1
       end
-      p path
     end
-    path #returned outside of all do/end loops!
+    path 
   end
 
+  #returns an array of positions in a diagonal path
   def diagonal_path(from, to)
     path = []
 
@@ -340,6 +369,7 @@ class Piece
     path
   end
 
+  #checks to see if a move is a straight line
   def is_straight?(from, to)
     if from[0] == to[0] || from[1] == to[1]
       true
@@ -423,9 +453,6 @@ class Pawn < Piece
 
 end
 
-# path(from, to)
-# returns an array of positions from from to to
-# custom build for each type of piece
-
+#scripth to start a new game
 game = Chess.new
 game.play
