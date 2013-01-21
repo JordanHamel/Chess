@@ -1,5 +1,5 @@
-#Jordan Hamel
-#spec for chess.rb 
+# Jordan Hamel
+# spec for chess.rb 
 
 require 'rspec'
 require_relative 'chess'
