@@ -1,5 +1,5 @@
-# Jordan Hamel
-# spec for chess.rb 
+#Jordan Hamel
+#spec for chess.rb 
 
 require 'rspec'
 require_relative 'chess'
@@ -9,7 +9,7 @@ describe Chess do
   subject(:game) { Chess.new }
 
 	describe "#populate_board" do
-		it "fills the board with pieces in the correct places" do
+	 it "fills the board with pieces in the correct places" do
 			game.board[1][3].class.should eq(Pawn)
 		end
 
